@@ -5,9 +5,9 @@
   --line: rgba(183, 122, 255, 0.4);
   --text: #d8dcff;
   --muted: #8f97b4;
-  --accent-a: #4cb6ff;
+  --accent-a: #4194f2; /* 调整为更接近图中的蓝色 */
   --accent-b: #8e79ff;
-  --accent-c: #ff6ea8;
+  --accent-c: #e16e8c; /* 调整为更接近图中的粉色 */
   --success: #9ef7a7;
   --warning: #ffe599;
   --danger: #ff8b8b;
@@ -35,8 +35,16 @@ body {
   font-family: "IBM Plex Mono", monospace;
   color: var(--text);
   background:
-    radial-gradient(circle at top left, rgba(76, 182, 255, 0.1), transparent 24%),
-    radial-gradient(circle at top right, rgba(255, 110, 168, 0.08), transparent 30%),
+    radial-gradient(
+      circle at top left,
+      rgba(76, 182, 255, 0.1),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(255, 110, 168, 0.08),
+      transparent 30%
+    ),
     linear-gradient(180deg, #040507 0%, #090d16 55%, #060810 100%);
 }
 
@@ -44,6 +52,17 @@ body {
   width: 100%;
 }
 
+.ascii-trail-background {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.76;
+  z-index: 0;
+}
+
+/* 屏幕背景装饰 */
 body::before,
 body::after {
   content: "";
@@ -80,9 +99,12 @@ body::after {
   background-size: 24px 24px;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.68), transparent 92%);
   pointer-events: none;
+  z-index: 0;
 }
 
 .shell {
+  position: relative;
+  z-index: 1;
   width: min(860px, calc(100vw - 72px));
   margin: 20px auto;
   padding: 22px 24px;
@@ -94,35 +116,37 @@ body::after {
   box-shadow: var(--shadow);
 }
 
-.hero {
-  margin-bottom: 16px;
-  animation: rise-in 520ms ease-out both;
-}
-
-.eyebrow,
-.hero-copy,
-.terminal-topbar,
-.terminal-footer,
-.output-line,
-.prompt-row input,
-.tips ol {
-  font-size: clamp(0.76rem, 1.45vw, 0.95rem);
-}
-
-.eyebrow {
-  margin: 0 0 12px;
-  color: var(--success);
-  letter-spacing: 0.08em;
-}
+/* --- LOGO 像素核心样式 --- */
 
 .logo-frame {
+  position: relative;
   display: inline-flex;
   margin-bottom: 12px;
-  padding: 10px 10px 8px;
+  padding: 12px 16px;
   border: 1px solid rgba(160, 117, 255, 0.45);
+  background: #06080e;
+  box-shadow: inset 0 0 15px rgba(76, 182, 255, 0.1);
+  overflow: hidden; /* 裁剪内部扫描线 */
+}
+
+/* 模拟 CRT 扫描线叠加在 Logo 上 */
+.logo-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
   background:
-    linear-gradient(180deg, rgba(6, 8, 14, 0.96), rgba(10, 12, 22, 0.86));
-  box-shadow: inset 0 0 0 1px rgba(76, 182, 255, 0.08);
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%),
+    linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.03),
+      rgba(0, 255, 0, 0.01),
+      rgba(0, 0, 255, 0.03)
+    );
+  background-size:
+    100% 3px,
+    3px 100%;
+  pointer-events: none;
+  z-index: 10;
 }
 
 .logo {
@@ -130,63 +154,78 @@ body::after {
   display: inline-block;
   margin: 0;
   font-family: "Press Start 2P", system-ui;
-  font-size: clamp(1.8rem, 6.2vw, 4.7rem);
-  line-height: 0.94;
-  letter-spacing: 0.08em;
+  font-size: clamp(1.8rem, 6.2vw, 4.2rem); /* 稍微缩小一点更精致 */
+  line-height: 1;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
+  /* 强制像素渲染 */
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.logo::before,
-.logo::after,
-.logo span {
-  content: "";
-  display: block;
-}
-
+/* 顶层彩色文字 */
 .logo span {
   position: relative;
+  display: block;
   color: transparent;
-  background: linear-gradient(90deg, var(--accent-a), var(--accent-b) 55%, var(--accent-c));
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(
+    90deg,
+    var(--accent-a) 0%,
+    var(--accent-b) 55%,
+    var(--accent-c) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
-  text-shadow:
-    2px 0 0 rgba(4, 6, 12, 0.98),
-    0 2px 0 rgba(4, 6, 12, 0.98),
-    2px 2px 0 rgba(4, 6, 12, 0.98),
-    4px 4px 0 rgba(8, 12, 22, 0.82);
-  z-index: 2;
+  filter: drop-shadow(2px 2px 0 rgba(6, 8, 14, 0.95));
+  z-index: 3;
 }
 
-.logo::before,
+/* 背后的 bit 点阵层 */
 .logo::after {
   position: absolute;
   inset: 0;
   content: attr(data-text);
-  font: inherit;
-  letter-spacing: inherit;
-  line-height: inherit;
-  text-transform: inherit;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-.logo::before {
-  color: rgba(6, 8, 14, 0.96);
-  transform: translate(6px, 6px);
-  opacity: 1;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(
+    90deg,
+    rgba(76, 182, 255, 0.82),
+    rgba(142, 121, 255, 0.8) 55%,
+    rgba(255, 110, 168, 0.8)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-mask: radial-gradient(circle, #000 24%, transparent 28%) 0 0 / 3px 3px;
+  mask: radial-gradient(circle, #000 24%, transparent 28%) 0 0 / 3px 3px;
+  transform: translate(10px, 10px);
+  opacity: 0.95;
   z-index: 1;
 }
 
-.logo::after {
-  color: transparent;
-  background:
-    radial-gradient(circle, rgba(92, 175, 255, 0.95) 34%, transparent 38%) 0 0 / 7px 7px,
-    linear-gradient(90deg, rgba(76, 182, 255, 0.75), rgba(142, 121, 255, 0.72) 55%, rgba(255, 110, 168, 0.72));
-  -webkit-background-clip: text;
-  background-clip: text;
-  transform: translate(10px, 10px);
-  opacity: 0.5;
-  z-index: 0;
+/* 介于前景和点阵层之间的暗色块状阴影 */
+.logo::before {
+  position: absolute;
+  inset: 0;
+  content: attr(data-text);
+  color: rgba(6, 8, 14, 0.98);
+  transform: translate(5px, 5px);
+  z-index: 2;
+}
+
+/* --- 终端其它部分 --- */
+
+.hero {
+  margin-bottom: 16px;
+  animation: rise-in 520ms ease-out both;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--success);
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
 }
 
 .hero-copy {
@@ -194,6 +233,7 @@ body::after {
   margin: 0;
   color: #c7cdef;
   line-height: 1.35;
+  font-size: 0.9rem;
 }
 
 .tips {
@@ -204,7 +244,7 @@ body::after {
 .tips h2 {
   margin: 0 0 10px;
   font-family: "Press Start 2P", system-ui;
-  font-size: clamp(0.8rem, 1.7vw, 1rem);
+  font-size: 0.85rem;
   color: #c8b8ff;
 }
 
@@ -213,6 +253,7 @@ body::after {
   padding-left: 1.4rem;
   line-height: 1.35;
   color: #c4caf0;
+  font-size: 0.85rem;
 }
 
 code {
@@ -232,10 +273,23 @@ code {
   gap: 16px;
   padding: 8px 12px;
   color: var(--muted);
+  font-size: 0.8rem;
 }
 
 .terminal-topbar {
   border-bottom: 1px solid rgba(147, 118, 255, 0.22);
+}
+
+.terminal-footer span:nth-child(1) {
+  color: var(--success);
+}
+
+.terminal-footer span:nth-child(2) {
+  color: var(--warning);
+}
+
+.terminal-footer span:nth-child(3) {
+  color: #c8b8ff;
 }
 
 .terminal-body {
@@ -243,14 +297,13 @@ code {
 }
 
 .history {
-  min-height: 120px;
-  max-height: 160px;
+  height: 160px;
   overflow: auto;
   padding-right: 4px;
 }
 
 .history::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .history::-webkit-scrollbar-thumb {
@@ -259,28 +312,41 @@ code {
 
 .output-line {
   margin-bottom: 6px;
-  line-height: 1.28;
+  line-height: 1.3;
   word-break: break-word;
+  font-size: 0.85rem;
 }
 
 .output-line.system {
   color: var(--success);
 }
-
 .output-line.info {
   color: var(--text);
 }
-
-.output-line.warning {
-  color: var(--warning);
-}
-
 .output-line.error {
   color: var(--danger);
 }
-
 .output-line.command {
   color: #bfa2ff;
+}
+
+.output-line .help-title {
+  color: #c8b8ff;
+}
+
+.output-line .help-command {
+  display: inline-block;
+  min-width: 6.5rem;
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.output-line .help-desc {
+  color: var(--text);
+}
+
+.output-line .help-url {
+  color: var(--success);
 }
 
 .prompt-row {
@@ -289,15 +355,14 @@ code {
   align-items: center;
   gap: 10px;
   margin-top: 8px;
-  padding: 8px 10px;
-  border: 2px solid rgba(129, 176, 255, 0.85);
-  border-radius: 8px;
-  background: rgba(12, 20, 33, 0.95);
-  box-shadow: inset 0 0 0 1px rgba(129, 176, 255, 0.14);
+  padding: 8px 12px;
+  border: 2px solid rgba(129, 176, 255, 0.6);
+  border-radius: 6px;
+  background: rgba(8, 12, 22, 0.95);
 }
 
 .prompt-symbol {
-  font-size: clamp(1.1rem, 2.5vw, 1.7rem);
+  font-size: 1.2rem;
   font-weight: 700;
   color: #cda9ff;
 }
@@ -309,23 +374,14 @@ code {
   color: var(--text);
   background: transparent;
   font-family: inherit;
-}
-
-.prompt-row input::placeholder {
-  color: rgba(216, 220, 255, 0.42);
-}
-
-.terminal-footer {
-  margin-top: 8px;
-  padding: 0;
+  font-size: 0.9rem;
 }
 
 @keyframes rise-in {
   from {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(12px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -334,24 +390,15 @@ code {
 
 @media (max-width: 720px) {
   .shell {
-    width: min(100vw - 20px, 860px);
-    margin: 12px auto;
+    width: calc(100vw - 24px);
     padding: 16px;
-    border-radius: 22px;
   }
-
-  .logo-frame {
-    padding: 8px 8px 6px;
+  .logo {
+    font-size: 2.2rem;
   }
-
   .terminal-topbar,
   .terminal-footer {
     flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .history {
-    min-height: 110px;
-    max-height: 140px;
+    gap: 4px;
   }
 }

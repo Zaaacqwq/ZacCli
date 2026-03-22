@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import AsciiTrailBackground from "./AsciiTrailBackground.jsx";
 
 const INITIAL_HISTORY = [
   {
@@ -19,10 +20,31 @@ function openInNewTab(url) {
 
 function buildHelpLines(commands) {
   const lines = Object.entries(commands).map(
-    ([name, config]) => `${name.padEnd(10, " ")}${config.description}`,
+    ([name, config]) =>
+      `<span class="help-command">${name}</span><span class="help-desc">${config.description}</span>`,
   );
 
-  return ["Available commands:", ...lines, "Aliases: go <name>, open <name>"];
+  return [
+    '<span class="help-title">Available commands:</span>',
+    ...lines,
+    '<span class="help-title">Aliases:</span> <span class="help-command">go</span><span class="help-desc">&lt;name&gt;</span>, <span class="help-command">open</span><span class="help-desc">&lt;name&gt;</span>',
+  ];
+}
+
+function commandToken(text) {
+  return `<span class="help-command">${text}</span>`;
+}
+
+function detailText(text) {
+  return `<span class="help-desc">${text}</span>`;
+}
+
+function titleText(text) {
+  return `<span class="help-title">${text}</span>`;
+}
+
+function urlToken(text) {
+  return `<span class="help-url">${text}</span>`;
 }
 
 export default function App() {
@@ -39,12 +61,15 @@ export default function App() {
   const commands = {
     help: {
       description: "Show all available commands.",
-      action: () => buildHelpLines(commands).map((text) => ({ kind: "info", text })),
+      action: () =>
+        buildHelpLines(commands).map((text) => ({ kind: "info", text })),
     },
     blog: {
       description: "Open the blog subdomain.",
       action: () => {
-        appendLines([{ kind: "system", text: "Routing to https://blog.zaaac.vip ..." }]);
+        appendLines([
+          { kind: "system", text: "Routing to https://blog.zaaac.vip ..." },
+        ]);
         window.setTimeout(() => {
           openInNewTab(ROUTES.blog);
         }, 220);
@@ -54,7 +79,12 @@ export default function App() {
     portfolio: {
       description: "Open the portfolio subdomain.",
       action: () => {
-        appendLines([{ kind: "system", text: "Routing to https://portfolio.zaaac.vip ..." }]);
+        appendLines([
+          {
+            kind: "system",
+            text: "Routing to https://portfolio.zaaac.vip ...",
+          },
+        ]);
         window.setTimeout(() => {
           openInNewTab(ROUTES.portfolio);
         }, 220);
@@ -64,7 +94,9 @@ export default function App() {
     home: {
       description: "Return to the main domain.",
       action: () => {
-        appendLines([{ kind: "system", text: "Refreshing terminal state ..." }]);
+        appendLines([
+          { kind: "system", text: "Refreshing terminal state ..." },
+        ]);
         window.setTimeout(() => {
           openInNewTab(ROUTES.home);
         }, 220);
@@ -74,24 +106,36 @@ export default function App() {
     about: {
       description: "Show information about this site.",
       action: () => [
-        { kind: "info", text: "zaaac.vip is a command-driven landing page." },
         {
           kind: "info",
-          text: "Use short commands to jump across subdomains and utilities.",
+          text: `${titleText("About:")} ${detailText("zaaac.vip is a command-driven landing page.")}`,
         },
         {
           kind: "info",
-          text: "The interface is designed to feel like a personal terminal shell.",
+          text: `${commandToken("commands")} ${detailText("Use short commands to jump across subdomains and utilities.")}`,
+        },
+        {
+          kind: "info",
+          text: `${commandToken("style")} ${detailText("The interface is designed to feel like a personal terminal shell.")}`,
         },
       ],
     },
     links: {
       description: "List direct subdomain URLs.",
       action: () => [
-        { kind: "info", text: "Quick links:" },
-        { kind: "info", text: "blog       https://blog.zaaac.vip" },
-        { kind: "info", text: "portfolio  https://portfolio.zaaac.vip" },
-        { kind: "info", text: "root       https://zaaac.vip" },
+        { kind: "info", text: titleText("Quick links:") },
+        {
+          kind: "info",
+          text: `${commandToken("blog")} ${urlToken("https://blog.zaaac.vip")}`,
+        },
+        {
+          kind: "info",
+          text: `${commandToken("portfolio")} ${urlToken("https://portfolio.zaaac.vip")}`,
+        },
+        {
+          kind: "info",
+          text: `${commandToken("root")} ${urlToken("https://zaaac.vip")}`,
+        },
       ],
     },
     clear: {
@@ -160,7 +204,9 @@ export default function App() {
     const normalizedValue = value.replace(/^(go|open)\s+/, "");
     const command = commands[normalizedValue];
 
-    setHistory((current) => current.concat({ kind: "command", text: `&gt; ${value}` }));
+    setHistory((current) =>
+      current.concat({ kind: "command", text: `&gt; ${value}` }),
+    );
     setInputValue("");
 
     if (!command) {
@@ -181,13 +227,14 @@ export default function App() {
 
   return (
     <>
+      <AsciiTrailBackground />
       <div className="background-grid" aria-hidden="true" />
       <main className="shell" aria-label="zaaac.vip terminal interface">
         <section className="hero">
           <p className="eyebrow">zaaac.vip / root node</p>
           <div className="logo-frame">
-            <h1 className="logo" aria-label="ZAAAC terminal" data-text="ZAAAC">
-              <span>ZAAAC</span>
+            <h1 className="logo" aria-label="ZAAAC terminal" data-text=">ZAAAC">
+              <span>>ZAAAC</span>
             </h1>
           </div>
           <p className="hero-copy">
@@ -203,7 +250,8 @@ export default function App() {
               Use <code>blog</code> to open <code>blog.zaaac.vip</code>.
             </li>
             <li>
-              Use <code>portfolio</code> to open <code>portfolio.zaaac.vip</code>.
+              Use <code>portfolio</code> to open{" "}
+              <code>portfolio.zaaac.vip</code>.
             </li>
             <li>
               Type <code>links</code> or <code>help</code> for more commands.
@@ -228,7 +276,11 @@ export default function App() {
               ))}
             </div>
 
-            <form className="prompt-row" autoComplete="off" onSubmit={handleSubmit}>
+            <form
+              className="prompt-row"
+              autoComplete="off"
+              onSubmit={handleSubmit}
+            >
               <label className="prompt-symbol" htmlFor="command-input">
                 &gt;
               </label>
