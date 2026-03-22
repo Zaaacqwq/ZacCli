@@ -215,7 +215,7 @@ export default function AsciiTrailBackground() {
       const isSettling = idleMs > IDLE_SETTLE_MS;
       const basePull = isSettling ? 0.28 : 0.14;
       const speedPull = Math.min(0.08, point.speed / 1200);
-      const followStrength = Math.min(0.38, basePull + speedPull);
+      const followStrength = isSettling ? 0.28 : 0;
 
       point.x += dx * followStrength;
       point.y += dy * followStrength;
@@ -267,7 +267,7 @@ export default function AsciiTrailBackground() {
 
           const fadeAlpha = point.fadeStartedAt
             ? Math.max(0, 1 - ageRatio * 0.92)
-            : 1;
+            : Math.max(0, 1 - Math.pow(index / TRAIL_LIMIT, 1.2));
           const alpha = strength * glyphAlpha(glyph) * fadeAlpha;
           const key = `${x}:${y}`;
           const existing = cellMap.get(key);

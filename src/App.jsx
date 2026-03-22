@@ -234,7 +234,7 @@ export default function App() {
           <p className="eyebrow">zaaac.vip / root node</p>
           <div className="logo-frame">
             <h1 className="logo" aria-label="ZAAAC terminal" data-text=">ZAAAC">
-              <span>>ZAAAC</span>
+              <span>&gt;ZAAAC</span>
             </h1>
           </div>
           <p className="hero-copy">
